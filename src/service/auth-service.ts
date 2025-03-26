@@ -36,6 +36,8 @@ export class AuthService {
     if (!isPasswordValid)
       throw new ResponseError(401, "Email or password is invalid");
 
+    await prismaClient.token.deleteMany({ where: { userId: user.id } });
+
     const token = generateAccessToken({
       id: user.id,
       fullName: user.profile?.fullName,
@@ -44,8 +46,6 @@ export class AuthService {
       id: user.id,
       fullName: user.profile?.fullName,
     });
-
-    await prismaClient.token.deleteMany({ where: { userId: user.id } });
 
     const response = toUserResponse(user);
     response.token = token;
