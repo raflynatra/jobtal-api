@@ -20,6 +20,9 @@ model User {
   created_at DateTime @default(now())
   profile    Profile?
   token      Token?
+  company    Company? @relation(fields: [companyId], references: [id])
+  companyId  String?
+  jobs       Job[]
 
   @@map("users")
 }
@@ -45,4 +48,57 @@ model Token {
   createdAt    DateTime @default(now())
 
   @@map("tokens")
+}
+
+model Company {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  logoUrl    String?
+  location   String
+  websiteUrl String?
+  industry   String
+  cretedAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  jobs       Job[]
+  users      User[]
+
+  @@map("companies")
+}
+
+model Job {
+  id              String          @id @default(uuid())
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  company         Company?        @relation(fields: [companyId], references: [id])
+  location        String
+  description     String
+  salary          Int
+  userId          String
+  companyId       String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  jobType         JobType
+  experienceLevel ExperienceLevel
+  workMode        WorkMode
+
+  @@map("jobs")
+}
+
+enum ExperienceLevel {
+  FRESH_GRADUATE
+  ONE_TO_THREE_YEARS
+  THREE_TO_FIVE_YEARS
+  FIVE_PLUS_YEARS
+}
+
+enum WorkMode {
+  ONSITE
+  REMOTE
+  HYBRID
+}
+
+enum JobType {
+  FULLTIME
+  INTERNSHIP
+  CONTRACT
 }
