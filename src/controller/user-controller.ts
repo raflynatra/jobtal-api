@@ -40,6 +40,7 @@ export class UserController {
   static async delete(req: UserRequest, res: Response, next: NextFunction) {
     try {
       await UserService.delete(req.user!);
+
       res.status(200).json(toApiResponse("success", null));
     } catch (error) {
       next(error);

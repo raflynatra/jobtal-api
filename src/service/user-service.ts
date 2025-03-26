@@ -51,7 +51,7 @@ export class UserService {
   static async get(user: User): Promise<UserResponse> {
     const result = await prismaClient.user.findFirst({
       where: {
-        email: user?.email,
+        id: user.id,
       },
       include: {
         profile: true,

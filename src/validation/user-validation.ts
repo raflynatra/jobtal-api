@@ -14,6 +14,8 @@ export class UserValidation {
 
   static readonly UPDATE: ZodType = z.object({
     password: z.string().min(1).max(100).optional(),
-    name: z.string().min(1).max(100).optional(),
+    fullName: z.string().min(1).max(100).optional(),
+    avatarUrl: z.string().optional(),
+    phone: z.string().optional(),
   });
 }

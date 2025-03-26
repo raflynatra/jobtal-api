@@ -8,7 +8,7 @@ export type UserResponse = {
   refreshToken?: string;
 };
 
-export type UserParams = User & {
+export type UserData = User & {
   profile: Profile | null;
 };
 
@@ -24,12 +24,14 @@ export type LoginUserRequest = {
 };
 
 export type UpdateUserRequest = {
-  name?: string;
+  id: string;
+  email: string;
+  fullName?: string;
   avatarUrl?: string;
   phone?: string;
 };
 
-export function toUserResponse(user: UserParams): UserResponse {
+export function toUserResponse(user: UserData): UserResponse {
   return {
     id: user.id,
     email: user.email,
