@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import {
   CreateCompanyRequest,
   UpdateCompanyRequest,
-} from "../model/company-model";
-import { CompanyService } from "../service/company-service";
-import { toApiResponse } from "../model/response-model";
+} from "@/model/company-model";
+import { CompanyService } from "./service";
+import { toApiResponse } from "@/model/response-model";
 
 export class CompanyController {
   static async create(req: Request, res: Response, next: NextFunction) {

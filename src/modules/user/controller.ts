@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { CreateUserRequest, UpdateUserRequest } from "../model/user-model";
-import { UserService } from "../service/user-service";
-import { UserRequest } from "../type/user-request";
-import { toApiResponse } from "../model/response-model";
+import { CreateUserRequest, UpdateUserRequest } from "@/model/user-model";
+import { UserService } from "./service";
+import { UserRequest } from "@/modules/user/types";
+import { toApiResponse } from "@/model/response-model";
 
 export class UserController {
   static async create(req: Request, res: Response, next: NextFunction) {
@@ -18,7 +18,7 @@ export class UserController {
 
   static async get(req: UserRequest, res: Response, next: NextFunction) {
     try {
-      const response = await UserService.get(req.user!);
+      const response = await UserService.getUserById(req.user?.id);
 
       res.status(200).json(toApiResponse("success", response));
     } catch (error) {
@@ -29,7 +29,7 @@ export class UserController {
   static async update(req: UserRequest, res: Response, next: NextFunction) {
     try {
       const request: UpdateUserRequest = req.body as UpdateUserRequest;
-      const response = await UserService.update(req.user!, request);
+      const response = await UserService.update(request);
 
       res.status(200).json(toApiResponse("success", response));
     } catch (error) {
@@ -39,7 +39,7 @@ export class UserController {
 
   static async delete(req: UserRequest, res: Response, next: NextFunction) {
     try {
-      await UserService.delete(req.user!);
+      await UserService.delete(req.user?.id);
 
       res.status(200).json(toApiResponse("success", null));
     } catch (error) {

@@ -26,28 +26,20 @@ export type UpdateCompanyRequest = {
   id: string;
 } & Partial<CreateCompanyRequest>;
 
-export function toCompanyResponse(
-  company: CompanyData | CompanyData[]
-): CompanyResponse | CompanyResponse[] {
-  if (Array.isArray(company)) {
-    return company.map((c) => ({
-      id: c.id,
-      name: c.name,
-      logoUrl: c.logoUrl,
-      location: c.location,
-      industry: c.industry,
-      websiteUrl: c.websiteUrl,
-      totalJobCount: c.jobs?.length,
-    }));
-  }
+export function toCompanyResponse<T extends CompanyData | CompanyData[]>(
+  company: T
+): T extends CompanyData[] ? CompanyResponse[] : CompanyResponse {
+  const transform = (c: CompanyData): CompanyResponse => ({
+    id: c.id,
+    name: c.name,
+    logoUrl: c.logoUrl,
+    location: c.location,
+    industry: c.industry,
+    websiteUrl: c.websiteUrl,
+    totalJobCount: c.jobs?.length,
+  });
 
-  return {
-    id: company.id,
-    name: company.name,
-    logoUrl: company.logoUrl,
-    location: company.location,
-    industry: company.industry,
-    websiteUrl: company.websiteUrl,
-    totalJobCount: company?.jobs?.length,
-  };
+  return (
+    Array.isArray(company) ? company.map(transform) : transform(company)
+  ) as T extends CompanyData[] ? CompanyResponse[] : CompanyResponse;
 }

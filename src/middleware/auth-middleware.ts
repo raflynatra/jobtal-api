@@ -1,8 +1,8 @@
 import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../constants";
-import { UserRequest } from "../type/user-request";
-import { toApiResponse } from "../model/response-model";
+import { JWT_SECRET } from "@/constants";
+import { UserRequest } from "@/modules/user/types";
+import { toApiResponse } from "@/model/response-model";
 
 export const authMiddleware = async (
   req: UserRequest,

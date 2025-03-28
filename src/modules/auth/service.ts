@@ -1,30 +1,33 @@
 import {
   LoginUserRequest,
+  RegisterUserRequest,
   toUserResponse,
+  UserData,
   UserResponse,
-} from "../model/user-model";
-import { UserValidation } from "../validation/user-validation";
-import { Validation } from "../validation/validation";
-import { prismaClient } from "../application/database";
-import { ResponseError } from "../error/response-error";
+} from "@/model/user-model";
+import { Validation } from "@/validation";
+import { ResponseError } from "@/error/response-error";
 import bcrypt from "bcrypt";
-import { generateAccessToken, generateRefreshToken } from "../utils/auth";
+import { generateAccessToken, generateRefreshToken } from "@/utils/auth";
 import jwt from "jsonwebtoken";
-import { JWT_REFRESH_SECRET } from "../constants";
-import { JWTPayload } from "../type";
+import { JWT_REFRESH_SECRET } from "@/constants";
+import { JWTPayload } from "@/modules/auth/type";
+import { AuthRepository } from "./repository";
+import { AuthValidation } from "./validation";
+import { UserService } from "../user/service";
 
 export class AuthService {
-  static async login(request: LoginUserRequest): Promise<UserResponse> {
-    const loginRequest = Validation.validate(UserValidation.LOGIN, request);
+  static async register(request: RegisterUserRequest): Promise<UserResponse> {
+    return UserService.create(request);
+  }
 
-    const user = await prismaClient.user.findUnique({
-      where: {
-        email: loginRequest.email,
-      },
-      include: {
-        profile: true,
-      },
-    });
+  static async login(request: LoginUserRequest): Promise<UserResponse> {
+    const loginRequest = Validation.validate(AuthValidation.LOGIN, request);
+
+    const user = (await UserService.getUserByEmail(
+      loginRequest.email,
+      true
+    )) as UserData;
 
     if (!user) throw new ResponseError(401, "Email or password is invalid");
 
@@ -36,7 +39,7 @@ export class AuthService {
     if (!isPasswordValid)
       throw new ResponseError(401, "Email or password is invalid");
 
-    await prismaClient.token.deleteMany({ where: { userId: user.id } });
+    await AuthRepository.deleteTokenByUserId(user.id);
 
     const token = generateAccessToken({
       id: user.id,
@@ -55,21 +58,20 @@ export class AuthService {
   }
 
   static async logout(refreshToken: string) {
-    await prismaClient.token.deleteMany({
-      where: { refreshToken: refreshToken },
-    });
+    await AuthRepository.deleteTokenByRefreshToken(refreshToken);
   }
 
   static async refresh(refreshToken: string) {
-    const storedToken = await prismaClient.token.findUnique({
-      where: { refreshToken },
-    });
+    const storedToken = await AuthRepository.getTokenByRefreshToken(
+      refreshToken
+    );
+
     if (!storedToken)
       throw new ResponseError(403, "Invalid token or session expired");
 
     try {
       const user = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as JWTPayload;
-      await prismaClient.token.delete({ where: { refreshToken } });
+      await AuthRepository.deleteTokenByRefreshToken(refreshToken);
 
       const newRefreshToken = await generateRefreshToken(user);
       const newToken = generateAccessToken(user);

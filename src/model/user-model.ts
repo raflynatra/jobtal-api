@@ -1,18 +1,23 @@
-import { Profile, User } from "@prisma/client";
+import { removeProperties } from "@/utils/object";
+import { Prisma, Profile } from "@prisma/client";
 
 export type UserResponse = {
   id: string;
   email: string;
-  profile: Omit<Profile, "updatedAt"> | null;
+  profile?: Omit<Profile, "updatedAt" | "userId"> | null;
   token?: string;
   refreshToken?: string;
 };
 
-export type UserData = User & {
-  profile: Profile | null;
-};
+export type UserData = Prisma.UserGetPayload<{ include: { profile: true } }>;
 
 export type CreateUserRequest = {
+  email: string;
+  name: string;
+  password: string;
+};
+
+export type RegisterUserRequest = {
   email: string;
   name: string;
   password: string;
@@ -32,9 +37,17 @@ export type UpdateUserRequest = {
 };
 
 export function toUserResponse(user: UserData): UserResponse {
+  if (!user.profile)
+    return {
+      id: user.id,
+      email: user.email,
+    };
+
+  const profile = removeProperties(user.profile, ["userId", "updatedAt"]);
+
   return {
     id: user.id,
     email: user.email,
-    profile: user.profile,
+    profile: profile,
   };
 }

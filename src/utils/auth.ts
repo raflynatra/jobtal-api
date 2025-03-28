@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { JWT_REFRESH_SECRET, JWT_SECRET } from "../constants";
-import { prismaClient } from "../application/database";
+import { AuthRepository } from "../modules/auth/repository";
 
 type UserTokenParams = {
   id: string;
@@ -22,13 +22,29 @@ export async function generateRefreshToken(user: UserTokenParams) {
     }
   );
 
-  await prismaClient.token.create({
-    data: {
-      userId: user.id,
-      refreshToken,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
-  });
+  await AuthRepository.insertToken(refreshToken, user.id);
 
   return refreshToken;
+}
+
+export function generatePassword(length = 8) {
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*()_+-=[]{}|;:'\",.<>?/";
+
+  // Ensure at least one uppercase, one symbol
+  const requiredChars = [
+    uppercase[Math.floor(Math.random() * uppercase.length)],
+    symbols[Math.floor(Math.random() * symbols.length)],
+  ];
+
+  // Generate the rest of the password
+  const allChars = uppercase + lowercase + numbers + symbols;
+  while (requiredChars.length < length) {
+    requiredChars.push(allChars[Math.floor(Math.random() * allChars.length)]);
+  }
+
+  // Shuffle and return as a string
+  return [...requiredChars].sort(() => Math.random() - 0.5).join("");
 }

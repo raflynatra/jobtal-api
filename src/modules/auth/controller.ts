@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { CreateUserRequest, LoginUserRequest } from "../model/user-model";
-import { UserService } from "../service/user-service";
-import { UserRequest } from "../type/user-request";
-import { toApiResponse } from "../model/response-model";
-import { AuthService } from "../service/auth-service";
-import { ResponseError } from "../error/response-error";
+import { CreateUserRequest, LoginUserRequest } from "@/model/user-model";
+import { UserService } from "../user/service";
+import { UserRequest } from "@/modules/user/types";
+import { toApiResponse } from "@/model/response-model";
+import { AuthService } from "./service";
+import { ResponseError } from "@/error/response-error";
 
 export class AuthController {
   static async register(req: Request, res: Response, next: NextFunction) {

@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
-import { ResponseError } from "../error/response-error";
-import { toApiResponse } from "../model/response-model";
-import { logger } from "../application/logging";
+import { ResponseError } from "@/error/response-error";
+import { toApiResponse } from "@/model/response-model";
+import { logger } from "@/application/logging";
 
 export const errorMiddleware = async (
   error: Error,
